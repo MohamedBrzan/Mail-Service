@@ -1,0 +1,62 @@
+# Node
+node_modules/
+dist/
+.build/
+temp/
+tmp/
+.cache/
+.nyc_output/
+coverage/
+pnpm-lock.yaml
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# dotenv
+.env
+.env.*.local
+
+# System
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# TypeScript
+*.tsbuildinfo
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# Testing
+jest-test-results.json
+test-results/
+coverage/
+
+# Build artifacts
+build/
+*.tgz
+
+# IDEs
+.idea/
+*.iml
+
+# PM2
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# MacOS metadata
+*.DS_Store
+
+# Optional: ignore Git hooks if using Husky
+.husky/_/

@@ -1,0 +1,16 @@
+
+
+services:
+  mail-server:
+    container_name: mail-server-dev
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    env_file:
+      - .env
+    command: pnpm start:dev
