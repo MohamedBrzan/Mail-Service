@@ -13,8 +13,6 @@ export class MailService {
   async sendMail(dto: ContactDto) {
     const { name, email, message } = dto;
 
-    console.log(dto);
-
     const mailOptions = {
       from: `"${name}" <${this.config.get("MAIL_USER")}>`, // Must match authenticated user
       to: "mohamedbrzan.dev@gmail.com",
