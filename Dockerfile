@@ -2,16 +2,13 @@
 FROM node:20-alpine AS base
 WORKDIR /app
 
-# Install dependencies for pnpm and build tools
+# Install dependencies for build tools
 RUN apk add --no-cache libc6-compat openssl python3 make g++
-
-# Enable pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # ---- Dependencies ----
 FROM base AS deps
-COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --frozen-lockfile --prod=false
+COPY package.json ./
+RUN npm install
 
 # ---- Builder ----
 FROM base AS builder
@@ -19,7 +16,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Build the application
-RUN pnpm build
+RUN npm run build
 
 # ---- Production ----
 FROM base AS production
