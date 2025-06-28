@@ -1,14 +1,20 @@
 import { Module } from "@nestjs/common";
-import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
 import { APP_GUARD } from "@nestjs/core";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { MailerModule } from "@nestjs-modules/mailer";
 import { MailModule } from "./mail/mail.module";
+import { AppController } from "./app.controller";
 
 @Module({
   imports: [
     ThrottlerModule.forRoot({
-      throttlers: [{ ttl: 60000, limit: 3 }],
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 3,
+        },
+      ],
     }),
     ConfigModule.forRoot({ isGlobal: true }),
     MailerModule.forRootAsync({
@@ -27,6 +33,12 @@ import { MailModule } from "./mail/mail.module";
     }),
     MailModule,
   ],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  controllers: [AppController],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

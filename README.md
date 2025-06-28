@@ -1,170 +1,266 @@
-# 📬 nest-mail-contact-service
+# 📬 NestJS Mail Server - Railway Deployment
 
-&#x20;&#x20;
-
-A simple and secure **NestJS** service that receives contact form submissions via HTTP and forwards them to a designated Gmail account using SMTP. Built with TypeScript, Docker, and `pnpm`.
-
----
+A production-ready **NestJS** mail server that receives contact form submissions and forwards them via SMTP. Optimized for deployment on Railway.com.
 
 ## 🚀 Features
 
 - ✅ **Send emails** via Gmail SMTP
-- 🔀 **Reply-To user’s email** (so you can reply easily)
+- 🔀 **Reply-To user's email** for easy responses
 - 📩 **Secure contact API** (`POST /mail/contact`)
-- 🐳 **Dockerized**, with separate dev/prod workflows
-- 🧱 Clean, maintainable architecture (DTOs, service, controller)
-- 💜 Type-safe (TypeScript) with runtime validation (DTOs)
-- 🌐 Supports real-time dev with hot reload
+- 🐳 **Dockerized** with multi-stage builds
+- 🚂 **Railway-ready** deployment configuration
+- 🧱 Clean architecture with DTOs and validation
+- 💜 TypeScript with runtime validation
+- 🛡️ Rate limiting and CORS protection
+- 🏥 Health check endpoint
 
----
+## 🚂 Railway Deployment
 
-## 📁 Folder Structure
+### Quick Deploy
 
-```
-nest-mail-contact-service/
-├── src/
-│   ├── mail/
-│   │   ├── dto/
-│   │   │   └── contact.dto.ts
-│   │   ├── mail.controller.ts
-│   │   └── mail.service.ts
-│   ├── app.module.ts
-│   └── main.ts
-├── .env
-├── Dockerfile          # production image
-├── Dockerfile.dev      # development image
-├── docker-compose.dev.yml
-├── README.md
-├── package.json
-├── pnpm-lock.yaml
-└── tsconfig.json
-```
+1. **Fork/Clone** this repository
+2. **Connect to Railway**:
+   - Go to [Railway.app](https://railway.app)
+   - Click "New Project" → "Deploy from GitHub repo"
+   - Select your repository
+   - Railway will automatically detect the Dockerfile
 
----
+### Environment Variables
 
-## ⚙️ Quick Start
-
-### 1. Clone & Setup
-
-```bash
-git clone https://github.com/your-username/nest-mail-contact-service.git
-cd nest-mail-contact-service
-pnpm install
-```
-
-### 2. Create `.env` with:
+Set these in Railway's environment variables:
 
 ```env
-PORT=3000
+# Mail Configuration
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
 MAIL_USER=your_gmail@gmail.com
 MAIL_PASS=your_app_password
-MAIL_RECIPIENT=mohamedbrzan.dev@gmail.com
+MAIL_RECIPIENT=recipient@example.com
+
+# Optional: CORS Origins (comma-separated)
+ALLOWED_ORIGINS=https://yourdomain.com,https://anotherdomain.com
 ```
 
-> Use a Gmail App Password (2FA required) — see [Google App Passwords](https://myaccount.google.com/apppasswords).
+> **Important**: Use a Gmail App Password (2FA required) — see [Google App Passwords](https://myaccount.google.com/apppasswords).
 
----
+### Deployment Steps
 
-### 3. Development (Hot Reload with Docker)
+1. **Push to GitHub**:
+
+   ```bash
+   git add .
+   git commit -m "Add Railway deployment config"
+   git push origin main
+   ```
+
+2. **Railway will automatically**:
+
+   - Build the Docker image
+   - Deploy to production
+   - Provide a public URL
+
+3. **Set Environment Variables** in Railway dashboard
+
+4. **Test the deployment**:
+
+   ```bash
+   # Health check
+   curl https://your-app.railway.app/health
+
+   # Send test email
+   curl -X POST https://your-app.railway.app/mail/contact \
+     -H "Content-Type: application/json" \
+     -d '{
+       "name": "Test User",
+       "email": "test@example.com",
+       "message": "Hello from Railway!"
+     }'
+   ```
+
+## 🛠️ Local Development
+
+### Prerequisites
+
+- Node.js 20+
+- pnpm
+- Docker (optional)
+
+### Setup
 
 ```bash
-docker compose -f docker-compose.dev.yml up --build
+# Install dependencies
+pnpm install
+
+# Create .env file
+cp .env.example .env
+
+# Start development server
+pnpm start:dev
 ```
 
-Visit `http://localhost:3000` — service restarts on code changes.
+### Docker Development
 
----
+```bash
+# Build and run with Docker
+docker build -t nest-mail-server .
+docker run --env-file .env -p 3000:3000 nest-mail-server
+```
 
-### 4. Sending a Test Email (Postman/cURL)
+## 📁 Project Structure
 
-**Endpoint:** `POST http://localhost:3000/mail/contact`\
-**Body (JSON):**
+```
+nest-mail-server/
+├── src/
+│   ├── app.controller.ts      # Health check & API info
+│   ├── app.module.ts          # Main module configuration
+│   ├── main.ts               # Application bootstrap
+│   └── mail/
+│       ├── dto/
+│       │   └── contact.dto.ts
+│       ├── mail.controller.ts
+│       ├── mail.service.ts
+│       └── mail.module.ts
+├── Dockerfile                # Production Docker image
+├── railway.json             # Railway deployment config
+├── .dockerignore           # Docker build optimization
+└── package.json
+```
+
+## 🛡️ Security Features
+
+- **Rate Limiting**: 3 requests per minute per IP
+- **Input Validation**: DTO-based validation with class-validator
+- **CORS Protection**: Configurable origins
+- **Environment Variables**: Secure configuration management
+- **Non-root Docker**: Security-hardened container
+
+## 📊 API Endpoints
+
+### `GET /`
+
+API information and available endpoints.
+
+### `GET /health`
+
+Health check endpoint for Railway monitoring.
+
+**Response:**
 
 ```json
 {
-  "name": "Jane Doe",
-  "email": "jane@example.com",
-  "message": "Hello Mohamed, loved your project!"
+  "status": "ok",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "uptime": 123.456,
+  "environment": "production"
 }
 ```
 
----
-
-### 5. Production Build & Run
-
-```bash
-docker build -t nest-mail-contact-service .
-docker run --env-file .env -p 3000:3000 nest-mail-contact-service
-```
-
----
-
-## 🛠️ API Reference
-
 ### `POST /mail/contact`
 
-| Field   | Type   | Description            |
-| ------- | ------ | ---------------------- |
-| name    | string | Sender’s name          |
-| email   | string | Sender’s email address |
-| message | string | The message content    |
+Send a contact form email.
+
+**Request Body:**
+
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "message": "Hello, I'd like to get in touch!"
+}
+```
 
 **Success Response:**
 
 ```json
-{ "status": "ok", "message": "Message sent" }
+{
+  "status": "ok",
+  "message": "Message sent"
+}
 ```
 
-**Error Response:** `400` or `500` with validation or server errors.
+## 🔧 Configuration
+
+### Environment Variables
+
+| Variable          | Description                    | Default          |
+| ----------------- | ------------------------------ | ---------------- |
+| `PORT`            | Server port                    | `3000`           |
+| `MAIL_HOST`       | SMTP host                      | `smtp.gmail.com` |
+| `MAIL_PORT`       | SMTP port                      | `587`            |
+| `MAIL_USER`       | Gmail address                  | -                |
+| `MAIL_PASS`       | Gmail app password             | -                |
+| `MAIL_RECIPIENT`  | Recipient email                | -                |
+| `ALLOWED_ORIGINS` | CORS origins (comma-separated) | `*`              |
+
+### Rate Limiting
+
+Configured in `app.module.ts`:
+
+- **Limit**: 3 requests per minute
+- **TTL**: 60 seconds
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **Mail not sending**:
+
+   - Check Gmail App Password
+   - Verify SMTP settings
+   - Check Railway logs
+
+2. **Rate limiting**:
+
+   - Wait 60 seconds between requests
+   - Check IP address
+
+3. **CORS errors**:
+   - Set `ALLOWED_ORIGINS` environment variable
+   - Check frontend domain
+
+### Railway Logs
+
+View logs in Railway dashboard:
+
+```bash
+# View recent logs
+railway logs
+
+# Follow logs in real-time
+railway logs --follow
+```
+
+## 🚀 Production Checklist
+
+- [ ] Environment variables set in Railway
+- [ ] Gmail App Password configured
+- [ ] CORS origins configured
+- [ ] Health check endpoint working
+- [ ] Rate limiting tested
+- [ ] Email sending tested
+- [ ] SSL certificate active (Railway handles this)
+
+## 📈 Monitoring
+
+Railway provides:
+
+- **Automatic health checks**
+- **Deployment logs**
+- **Performance metrics**
+- **Error tracking**
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test locally and on Railway
+5. Submit a pull request
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-## 🔒 Security Advice
-
-- Validate inputs using classes and `class-validator`
-- Use rate limiting (e.g., `@nestjs/throttler`)
-- Optionally use CAPTCHA to avoid spam
-- For real "From" field, consider using SendGrid or Mailgun with verified domains
-
----
-
-## 💡 Optimizations & Extensibility
-
-- Swap Gmail SMTP for a transactional mail service
-- Add attachment support (`@nestjs-modules/mailer` supports it)
-- Deploy via CI/CD pipelines (GitHub Actions, GitLab CI, etc.)
-- Docker Compose for prod-ready deployment
-
----
-
-## 🌟 Contribution
-
-1. Fork & clone
-2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Commit and push changes
-4. Open a PR
-
----
-
-## 📓 License
-
-Distributed under the **MIT License**. See [LICENSE](LICENSE) for details.
-
----
-
-## 📈 Preview
-
-
-
----
-
-## 🔗 Useful Links
-
-- [NestJS Docs](https://docs.nestjs.com/)
-- [Gmail App Password Guide](https://support.google.com/accounts/answer/185833)
-- [pnpm Docs](https://pnpm.io/)
-
----
-
-*Created with professionalism and developer experience in mind.*
-
+**Deployed on Railway** 🚂 | **Built with NestJS** 🪺 | **TypeScript** 💜

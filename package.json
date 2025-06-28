@@ -1,14 +1,21 @@
 {
   "name": "nest-mail-server",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "NestJS Mail Server for Railway Deployment",
+  "main": "dist/main.js",
   "scripts": {
+    "build": "nest build",
     "start": "node dist/main.js",
     "start:dev": "nest start --watch",
-    "build": "tsc -p tsconfig.json"
+    "start:prod": "node dist/main.js",
+    "postinstall": "nest build"
   },
-  "keywords": [],
+  "keywords": [
+    "nestjs",
+    "mail",
+    "railway",
+    "api"
+  ],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.12.4",
@@ -28,5 +35,9 @@
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.7",
     "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=10.0.0"
   }
 }
