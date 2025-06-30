@@ -1,4 +1,10 @@
-import { Controller, Post, Body, BadRequestException } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Body,
+  BadRequestException,
+  InternalServerErrorException,
+} from "@nestjs/common";
 import { MailService } from "./mail.service";
 import { ContactDto } from "./dto/contact.dto";
 import { plainToInstance } from "class-transformer";
@@ -11,8 +17,20 @@ export class MailController {
   constructor(private readonly mailService: MailService) {}
 
   @Post("contact")
-  async sendMail(@Body() dto: ContactDto) {
-    return this.mailService.sendContactEmail(dto);
+  async sendMail(@Body() dto: ContactDto): Promise<{ message: string }> {
+    try {
+      await this.mailService.sendContactEmail(dto);
+
+      return {
+        message:
+          "✅ Thank you for reaching out. Your message has been successfully delivered.",
+      };
+    } catch (error) {
+      console.error("❌ Failed to send contact email:", error);
+      throw new InternalServerErrorException(
+        "Failed to send your message. Please try again later."
+      );
+    }
   }
 
   @Post("meeting")
