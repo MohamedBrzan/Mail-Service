@@ -1,37 +1,93 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { MailerService } from "@nestjs-modules/mailer";
 import { ConfigService } from "@nestjs/config";
 import { ContactDto } from "./dto/contact.dto";
+import { MeetingDto } from "./dto/meeting.dto";
 
 @Injectable()
 export class MailService {
+  private readonly logger = new Logger(MailService.name);
+  private readonly recipient: string;
+
   constructor(
     private readonly mailerService: MailerService,
     private readonly config: ConfigService
-  ) {}
+  ) {
+    this.recipient = this.config.get<string>("MAIL_RECIPIENT")!;
+  }
 
-  async sendMail(dto: ContactDto) {
-    const { name, email, message } = dto;
+  async sendContactEmail(dto: ContactDto): Promise<void> {
+    await this.sendMail({
+      to: this.recipient,
+      subject: `New Contact Form Submission: ${dto.subject}`,
+      template: "contact-message",
+      context: { ...dto },
+    });
+  }
 
-    const mailOptions = {
-      from: `"${name}" <${this.config.get("MAIL_USER")}>`, // Must match authenticated user
-      to: "mohamedbrzan.dev@gmail.com",
-      replyTo: email, // ✅ This allows you to reply directly to the sender
-      subject: `📩 New Contact from ${name}`,
-      text: `
-    You have a new message from ${name} <${email}>:
+  async sendMeetingEmail(dto: MeetingDto): Promise<void> {
+    const context = this.buildMeetingContext(dto);
 
-    ${message}
-  `,
-      html: `
-    <p><strong>Name:</strong> ${name}</p>
-    <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-    <p><strong>Message:</strong><br>${message}</p>
-  `,
+    const confirmation = this.sendMail({
+      to: dto.email,
+      subject: `📅 Your Meeting Request: ${dto.meetingType}`,
+      template: "meeting-confirmation",
+      context,
+    });
+
+    const adminNotification = this.sendMail({
+      to: this.recipient,
+      subject: `📥 New Meeting Request from ${dto.name}`,
+      template: "meeting-request",
+      context,
+    });
+
+    await Promise.all([confirmation, adminNotification]);
+  }
+
+  async sendMeetingRequest(dto: MeetingDto): Promise<void> {
+    const context = this.buildMeetingContext(dto);
+    await this.sendMail({
+      to: this.recipient,
+      subject: `📅 New Meeting Request from ${dto.name}`,
+      template: "meeting-confirmation",
+      context,
+    });
+  }
+
+  private async sendMail({
+    to,
+    subject,
+    template,
+    context,
+  }: {
+    to: string;
+    subject: string;
+    template: string;
+    context: Record<string, any>;
+  }): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to,
+        subject,
+        template,
+        context,
+      });
+    } catch (error: any) {
+      this.logger.error(`Failed to send mail [${subject}]`, error.stack);
+      throw error;
+    }
+  }
+
+  private buildMeetingContext(meeting: MeetingDto): Record<string, any> {
+    return {
+      name: meeting.name,
+      email: meeting.email,
+      phone: meeting.phone,
+      meetingType: meeting.meetingType,
+      date: meeting.date.toLocaleDateString(),
+      time: meeting.time,
+      information: meeting.information,
     };
-
-    await this.mailerService.sendMail(mailOptions);
-
-    return { status: "ok", message: "Message sent" };
   }
 }

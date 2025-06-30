@@ -10,8 +10,7 @@
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,
     "sourceMap": false,
-    "incremental": true,
-    "types": ["node"]
+    "incremental": true
   },
   "include": ["src/**/*.ts"]
 }

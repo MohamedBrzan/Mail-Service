@@ -5,35 +5,48 @@ import { AppModule } from "./app.module";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Enable CORS for Railway deployment
+  // Configure CORS
   app.enableCors({
-    origin: process.env.ALLOWED_ORIGINS?.split(",") || "*",
+    origin: process.env.ALLOWED_ORIGINS?.split(",") ?? "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   });
 
-  // Global validation pipe
+  // Global validation
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
+      whitelist: true, // strip unknown props
+      forbidNonWhitelisted: true, // throw if unknown props exist
+      transform: true, // auto-transform DTOs
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     })
   );
 
-  // Global prefix (optional)
-  // app.setGlobalPrefix('api');
+  // Prefix for API versioning
+  app.setGlobalPrefix("api/v1");
 
-  const port = process.env.PORT || 3000;
-  await app.listen(port, "0.0.0.0");
+  // Start app
+  const port = process.env.PORT ?? 3000;
+  const host = process.env.HOST ?? "0.0.0.0";
+  await app.listen(port, host);
 
-  console.log(`🚀 Application is running on: http://localhost:${port}`);
-  console.log(`📧 Mail endpoint: http://localhost:${port}/mail/contact`);
-  console.log(`🏥 Health check: http://localhost:${port}/health`);
+  const isProd = process.env.NODE_ENV === "production";
+  const baseUrl = process.env.APP_BASE_URL ?? `http://localhost:${port}`;
+
+  console.log(
+    `🚀 Application is running on: ${baseUrl} as ${
+      isProd ? "Production" : "Development"
+    }`
+  );
+  console.log(`📧 Mail endpoint: ${baseUrl}/api/v1/mail/contact`);
+  console.log(`📅 Meeting endpoint: ${baseUrl}/api/v1/mail/meeting`);
+  console.log(`🏥 Health check: ${baseUrl}/api/v1/health`);
 }
 
 bootstrap().catch((error) => {
-  console.error("Failed to start application:", error);
+  console.error("❌ Failed to start application:", error);
   process.exit(1);
 });

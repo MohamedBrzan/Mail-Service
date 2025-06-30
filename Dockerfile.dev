@@ -1,20 +1,22 @@
-# ---- Development Dockerfile ----
+# Development Dockerfile
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Required for Nest CLI + pnpm + file watching
+# For pnpm + file watching
 RUN apk add --no-cache libc6-compat openssl bash
 
 # Enable pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Install deps
+# Copy dependency manifests
 COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies
 RUN pnpm install
 
-# Copy rest of the code
+# Copy application code
 COPY . .
 
-# Default command
+# Start dev mode
 CMD ["pnpm", "start:dev"]

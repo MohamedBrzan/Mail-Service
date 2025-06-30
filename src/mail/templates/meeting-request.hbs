@@ -1,0 +1,62 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>New Meeting Request</title>
+    <style>
+      body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f7; color: #333; padding: 40px 20px; margin: 0; }
+      .container { max-width: 600px; margin: auto; background-color: #ffffff;
+      padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0, 0, 0,
+      0.08); } .header { text-align: center; border-bottom: 1px solid #ddd;
+      padding-bottom: 15px; margin-bottom: 30px; } .header h1 { margin: 0;
+      color: #2c3e50; } .section { margin-bottom: 20px; } .section strong {
+      display: inline-block; width: 150px; color: #555; } .footer { text-align:
+      center; font-size: 12px; color: #999; margin-top: 40px; } .footer a {
+      color: #999; text-decoration: none; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📅 New Meeting Request</h1>
+      </div>
+
+      <div class="section">
+        <strong>Client Name:</strong>
+        {{name}}
+      </div>
+      <div class="section">
+        <strong>Email:</strong>
+        {{email}}
+      </div>
+      <div class="section">
+        <strong>Phone:</strong>
+        {{phone}}
+      </div>
+      <div class="section">
+        <strong>Meeting Type:</strong>
+        {{meetingType}}
+      </div>
+      <div class="section">
+        <strong>Preferred Date:</strong>
+        {{date}}
+      </div>
+      <div class="section">
+        <strong>Time:</strong>
+        {{time}}
+      </div>
+      <div class="section">
+        <strong>Additional Info:</strong>
+        <div
+          style="margin-left: 150px; white-space: pre-line;"
+        >{{information}}</div>
+      </div>
+
+      <div class="footer">
+        This email was sent from your booking system.
+        <br />
+        <a href="mailto:mohamedbrzan.dev@gmail.com">Reply to this client</a>
+      </div>
+    </div>
+  </body>
+</html>
